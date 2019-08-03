@@ -43,15 +43,15 @@ class BatchGenerator(Sequence):
         self.batch_size = batch_size
 
     def __getitem__(self, idx):
-        inputs = []
-        targets = []
+        inputs = np.zeros((self.batch_size, self.sequence_length, self.X.shape[-1]))
+        targets = np.zeros(self.batch_size)
         for idx_in_batch in range(self.batch_size):
             start = idx * self.batch_size + idx_in_batch
             end = start + self.sequence_length
-            inputs.append(self.X[start:end])
-            targets.append(self.y[end])
+            inputs[idx_in_batch] = self.X[start:end]
+            targets[idx_in_batch] = self.y[end]
 
-        return (np.array(inputs), np.array(targets))
+        return inputs, targets
 
     def __len__(self):
         return int((len(self.X) - self.sequence_length) / self.batch_size)
