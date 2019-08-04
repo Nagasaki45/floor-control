@@ -8,7 +8,7 @@ import numpy as np
 _FRAME_RATE = 20
 _SEQUENCE_DURATION = 10
 SEQUENCE_LENGTH = int(_FRAME_RATE * _SEQUENCE_DURATION)
-BATCH_SIZE = 256
+BATCH_SIZE = 128
 
 
 def prepare_model():
@@ -64,7 +64,7 @@ def main():
     for interactant in [0, 1]:
         model = prepare_model()
         batch_generator = BatchGenerator(X, ys[:, interactant], SEQUENCE_LENGTH, BATCH_SIZE)
-        model.fit_generator(batch_generator, epochs=20)
+        model.fit_generator(batch_generator, epochs=100)
         model.save(f'model_{interactant}.h5')
 
 
