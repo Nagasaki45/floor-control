@@ -8,7 +8,7 @@ import numpy as np
 _FRAME_RATE = 20
 _SEQUENCE_DURATION = 10
 SEQUENCE_LENGTH = int(_FRAME_RATE * _SEQUENCE_DURATION)
-BATCH_SIZE = 128
+BATCH_SIZE = 256
 
 
 def prepare_model():
