@@ -60,7 +60,6 @@ testpath==0.4.2           # via nbconvert
 tgt==1.4.4
 tornado==6.0.3            # via ipykernel, jupyter-client, notebook, terminado
 traitlets==4.3.2          # via ipykernel, ipython, jupyter-client, jupyter-core, nbconvert, nbformat, notebook
-vamp==1.1.0
 wcwidth==0.1.7            # via prompt-toolkit
 webencodings==0.5.1       # via bleach
 webrtcvad==2.0.10
