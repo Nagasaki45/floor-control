@@ -8,7 +8,10 @@ def dedup(iterable, key=lambda x: x):
         list(dedup([1, 1, 2, 1, 2, 2, 3])) == [1, 2, 1, 2, 3]
     '''
     it = iter(iterable)
-    current = next(it)
+    try:
+        current = next(it)
+    except StopIteration:
+        return
     yield current
     for item in it:
         if key(current) != key(item):

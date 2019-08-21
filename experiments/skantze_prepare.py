@@ -7,34 +7,18 @@
 import pathlib
 
 import numpy as np
-import scipy.io.wavfile as swavfile
 import scipy.stats as sstats
 import scipy.signal as ssignal
-import tgt
 
+import data_loading
 import yin
 
 DUEL_DIR = pathlib.Path('~/DUEL').expanduser()
 GERMAN_DIR = DUEL_DIR / 'de'
 ANNOTATIONS_DIR =  GERMAN_DIR / 'transcriptions_annotations'
 AUDIO_DIR = GERMAN_DIR / 'audio'
+OUT_DIR = pathlib.Path('data')
 BUFFER_DURATION = 0.05
-SEQUENCE_DURATION = 60
-SWAPPED_STEREO = {'r12', 'r13', 'r16'}
-
-
-# Data loading utils
-
-def load_data_generator(annotations_dir):
-    for session_dir in annotations_dir.glob('r*'):
-        session = session_dir.name
-        yield (
-            session,
-            {
-                'textgrid': tgt.io.read_textgrid(next(session_dir.glob('r*.TextGrid'))),
-                'audio_filepath': AUDIO_DIR / session / (session + '.wav'),
-            },
-        )
 
 
 # Data preparation utils
@@ -92,58 +76,59 @@ def calculate_spectral_flux(frames):
     return flux.T
 
 
-def calculate_X_and_ys(textgrid, audio_filepath, buffer_duration, swapped_stereo):
-    sample_rate, samples = swavfile.read(audio_filepath)
-    samples = (samples / np.iinfo(samples.dtype).max)
-    if swapped_stereo:
-        samples = samples[:, [1, 0]]
+def calculate_X_and_ys(
+        start_time,
+        end_time,
+        textgrid,
+        samples,
+        sample_rate,
+        buffer_duration,
+    ):
 
-    for part in textgrid.get_tier_by_name('Part').intervals:
-        start_time = part.start_time
-        end_time = part.end_time
+    samples = samples[int(start_time * sample_rate):int(end_time * sample_rate)]
+    buffer_size = int(sample_rate * buffer_duration)
+    frames = to_frames(samples, buffer_size)
 
-        buffer_size = int(sample_rate * buffer_duration)
-        frames = to_frames(
-            samples[int(start_time * sample_rate):int(end_time * sample_rate)],
-            buffer_size,
-        )
+    ys = calculate_voice_activity(textgrid, start_time, end_time, buffer_duration)
 
-        ys = calculate_voice_activity(textgrid, start_time, end_time, buffer_duration)
+    pitch = calculate_pitch(frames, sample_rate)
+    voiced = (pitch != 0)
+    power = calculate_power(frames)
+    spectral_flux = calculate_spectral_flux(frames)
 
-        pitch = calculate_pitch(frames, sample_rate)
-        voiced = (pitch != 0)
-        power = calculate_power(frames)
-        spectral_flux = calculate_spectral_flux(frames)
+    X = np.hstack([
+        ys,
+        sstats.zscore(pitch),
+        voiced,
+        sstats.zscore(power),
+        sstats.zscore(spectral_flux),
+    ])
 
-        X = np.hstack([
-            sstats.zscore(pitch),
-            voiced,
-            sstats.zscore(power),
-            sstats.zscore(spectral_flux),
-        ])
-
-        yield X, ys
+    return X, ys
 
 
 def main():
-    data = dict(load_data_generator(ANNOTATIONS_DIR))
+    data_gen = data_loading.generator(ANNOTATIONS_DIR, AUDIO_DIR)
 
-    Xs, yss = [], []
+    for session in data_gen:
+        session_name = session['name']
+        data_loading.load_samples(session)
 
-    for session_name, session_data in sorted(data.items()):
-        print('Processing', session_name)
-        gen = calculate_X_and_ys(
-            session_data['textgrid'],
-            session_data['audio_filepath'],
-            BUFFER_DURATION,
-            session_name in SWAPPED_STEREO,
-        )
-        for X, ys in gen:
-            Xs.append(X)
-            yss.append(ys)
+        for part in session['parts']:
+            part_name = part['name']
+            print(f'Processing {session_name}/{part_name}')
 
-    np.save('X.npy', np.vstack(Xs))
-    np.save('ys.npy', np.vstack(yss))
+            X, ys = calculate_X_and_ys(
+                part['start_time'],
+                part['end_time'],
+                session['textgrid'],
+                session['samples'],
+                session['sample_rate'],
+                BUFFER_DURATION,
+            )
+
+            np.save(OUT_DIR / f'X-{session_name}-{part_name}.npy', X)
+            np.save(OUT_DIR / f'ys-{session_name}-{part_name}.npy', ys)
 
 
 if __name__ == '__main__':
