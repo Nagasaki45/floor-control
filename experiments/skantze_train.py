@@ -39,7 +39,7 @@ def prepare_model():
             ),
         )
     )
-    model.add(Dense(units=60, activation='sigmoid'))
+    model.add(Dense(units=PREDICTION_LENGTH, activation='sigmoid'))
 
     model.compile(
         loss='mean_squared_error',
