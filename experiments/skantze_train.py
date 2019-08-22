@@ -16,7 +16,7 @@ _SEQUENCE_DURATION = 10
 _FUTURE_DURATION = 3
 SEQUENCE_LENGTH = _FRAME_RATE * _SEQUENCE_DURATION
 PREDICTION_LENGTH = _FRAME_RATE * _FUTURE_DURATION
-BATCH_SIZE = 256  # TODO try 32
+BATCH_SIZE = 32
 
 
 def session_part_generator(data):
@@ -97,7 +97,7 @@ def main():
             PREDICTION_LENGTH,
             BATCH_SIZE,
         )
-        model.fit_generator(batch_generator, epochs=1)  # TODO 100
+        model.fit_generator(batch_generator, epochs=10)  # TODO 100
         model.save(f'model_{interactant}.h5')
 
 
