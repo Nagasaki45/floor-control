@@ -97,7 +97,7 @@ def main():
             PREDICTION_LENGTH,
             BATCH_SIZE,
         )
-        model.fit_generator(batch_generator, epochs=10)  # TODO 100
+        model.fit_generator(batch_generator, epochs=100)
         model.save(f'model_{interactant}.h5')
 
 
