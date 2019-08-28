@@ -90,15 +90,15 @@ def calculate_X_and_ys(
     pitch[pitch < 0] = 0
     voiced = (freq != 0)
     power = np.clip(calculate_power(frames), -96, 0)  # 96dB is 16bit dynamic range
-    spectral_flux = calculate_spectral_flux(frames)
+    spectral_flux = np.nan_to_num(calculate_spectral_flux(frames))
 
     X = np.hstack([
         ys,
-        sstats.zscore(pitch),
+        np.apply_along_axis(sstats.zscore, axis=0, arr=pitch),
         pitch,
         voiced,
-        sstats.zscore(power),
-        sstats.zscore(np.nan_to_num(spectral_flux)),
+        np.apply_along_axis(sstats.zscore, axis=0, arr=power),
+        np.apply_along_axis(sstats.zscore, axis=0, arr=spectral_flux),
     ])
 
     return X, ys
