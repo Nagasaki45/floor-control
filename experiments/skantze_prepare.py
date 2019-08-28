@@ -1,9 +1,3 @@
-# Notes
-# - No Truncated Back-propagation Through Time
-# - Assume L2 regularization on the LSTM's kernal
-# - Voice activity of participant A is not used to predict participant's B
-# - Voiced (in pitch paragraph) is when pitch is not 0.
-
 import pathlib
 
 import numpy as np
@@ -42,7 +36,7 @@ def calculate_voice_activity(textgrid, start_time, end_time, buffer_duration):
     ])
 
 
-def calculate_pitch(frames, sample_rate):
+def calculate_freq(frames, sample_rate):
     return np.apply_along_axis(
         yin.compute_yin,
         axis=1,
@@ -91,17 +85,20 @@ def calculate_X_and_ys(
 
     ys = calculate_voice_activity(textgrid, start_time, end_time, buffer_duration)
 
-    pitch = calculate_pitch(frames, sample_rate)
-    voiced = (pitch != 0)
-    power = calculate_power(frames)
+    freq = calculate_freq(frames, sample_rate)
+    pitch = 69 + 12 * np.log2(freq / 440)  # MIDI note
+    pitch[pitch < 0] = 0
+    voiced = (freq != 0)
+    power = np.clip(calculate_power(frames), -96, 0)  # 96dB is 16bit dynamic range
     spectral_flux = calculate_spectral_flux(frames)
 
     X = np.hstack([
         ys,
         sstats.zscore(pitch),
+        pitch,
         voiced,
         sstats.zscore(power),
-        sstats.zscore(spectral_flux),
+        sstats.zscore(np.nan_to_num(spectral_flux)),
     ])
 
     return X, ys

@@ -16,7 +16,7 @@ _SEQUENCE_DURATION = 10
 _FUTURE_DURATION = 3
 SEQUENCE_LENGTH = _FRAME_RATE * _SEQUENCE_DURATION
 PREDICTION_LENGTH = _FRAME_RATE * _FUTURE_DURATION
-BATCH_SIZE = 32
+BATCH_SIZE = 256
 
 
 def session_part_generator(data):
@@ -35,7 +35,7 @@ def prepare_model():
             kernel_regularizer=regularizers.l2(0.001),
             input_shape=(
                 SEQUENCE_LENGTH,
-                2 * 5,  # Voice activation, pitch, voiced, power, and spectral flux per interactant
+                2 * 6,  # Voice activation, relative pitch, absolute pitch, voiced, power, and spectral flux per interactant
             ),
         )
     )
@@ -86,8 +86,6 @@ def main():
     X = np.vstack(Xs)
     ys = np.vstack(yss)
 
-    X = np.nan_to_num(X)
-
     for interactant in [0, 1]:
         model = prepare_model()
         batch_generator = BatchGenerator(
@@ -97,7 +95,7 @@ def main():
             PREDICTION_LENGTH,
             BATCH_SIZE,
         )
-        model.fit_generator(batch_generator, epochs=100)
+        model.fit_generator(batch_generator, epochs=10)  # TODO 100
         model.save(f'model_{interactant}.h5')
 
 
