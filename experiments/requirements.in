@@ -1,6 +1,7 @@
 -e ..
 h5py
 keras
+matplotlib
 notebook
 tensorflow
 tgt
