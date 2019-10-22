@@ -23,7 +23,7 @@ from floor_control import FloorControlDetector
 
 BUFFER_DURATION = 0.02
 
-with wave.open('/home/nagasaki45/DUEL/de/audio/r1/r1.wav') as wf:
+with wave.open('stereo_dialogue.wav') as wf:
     
     sample_rate = wf.getframerate()
     sample_width = wf.getsampwidth()
