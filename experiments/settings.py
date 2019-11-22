@@ -8,4 +8,4 @@ BUFFER_DURATION = 0.02
 BACKCHANNEL_WORDS = {'ja', 'okay', 'ohm', 'mhm', 'genau'}
 MAX_BACKCHANNEL_DURATION = 0.5
 ANNOTATIONS_TIERS = ['A-utts', 'B-utts']
-COMPARABLE_TIERS = ['detected', 'random', 'vad', 'skantze']
+COMPARABLE_TIERS = ['fcd', 'random', 'vad', 'lstm']
