@@ -52,7 +52,7 @@ pyrsistent==0.15.3        # via jsonschema
 python-dateutil==2.8.0    # via jupyter-client, matplotlib
 pyyaml==5.1.1             # via keras
 pyzmq==18.0.2             # via jupyter-client, notebook
-scipy==1.3.0              # via keras
+scipy==1.3.0
 send2trash==1.5.0         # via notebook
 six==1.12.0               # via absl-py, bleach, cycler, grpcio, h5py, jsonschema, keras, keras-preprocessing, prompt-toolkit, protobuf, pyrsistent, python-dateutil, tensorboard, tensorflow, traitlets
 tensorboard==1.14.0       # via tensorflow
@@ -72,4 +72,4 @@ wheel==0.33.4             # via tensorboard, tensorflow
 wrapt==1.11.2             # via tensorflow
 
 # The following packages are considered to be unsafe in a requirements file:
-# setuptools==41.2.0        # via ipython, jsonschema, kiwisolver, markdown, protobuf, tensorboard
+# setuptools==41.6.0        # via ipython, jsonschema, kiwisolver, markdown, protobuf, tensorboard
