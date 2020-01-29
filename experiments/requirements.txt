@@ -58,7 +58,7 @@ send2trash==1.5.0         # via notebook
 six==1.12.0               # via absl-py, bleach, cycler, grpcio, h5py, jsonschema, keras, keras-preprocessing, prompt-toolkit, protobuf, pyrsistent, python-dateutil, tensorboard, tensorflow, traitlets
 tensorboard==1.15.0       # via tensorflow
 tensorflow-estimator==1.15.1  # via tensorflow
-tensorflow==1.15
+tensorflow==1.15.2
 termcolor==1.1.0          # via tensorflow
 terminado==0.8.2          # via notebook
 testpath==0.4.2           # via nbconvert
@@ -73,4 +73,4 @@ wheel==0.33.4             # via tensorboard, tensorflow
 wrapt==1.11.2             # via tensorflow
 
 # The following packages are considered to be unsafe in a requirements file:
-# setuptools==44.0.0        # via ipython, jsonschema, kiwisolver, markdown, protobuf, tensorboard
+# setuptools==45.1.0        # via ipython, jsonschema, kiwisolver, markdown, protobuf, tensorboard
