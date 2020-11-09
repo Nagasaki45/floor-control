@@ -6,12 +6,15 @@ The FCD model is evaluated using multiple measures, against the annotated DUEL d
 One of these competitors is a state-of-the-art general turn-taking LSTM model (Skantze, 2017).
 We replicated that model with [keras](https://keras.io/).
 
-## How to use
+## Installation
 
 1. Make sure you have python install. The authors use version 3.8.6, but anything above 3.6 should work.
 1. Enter the experiments folder with `cd experiments`.
 1. Install dependencies with ``pip install -r requirements.txt``. Using a virtual environment and/or [pip-tools](https://github.com/jazzband/pip-tools) is highly recommended.
-1. Run the analysis notebook with `jupyter notebook`.
+
+## How to use
+
+Spin up `jupyter notebook` and run the analysis notebook.
 
 For reproducibility, the analysis notebook processes the data found in the `features`, `models`, and `predictions` directories that are provided with this repository. If you don't worry about generating these directories by yourself stop reading.
 
@@ -59,6 +62,10 @@ Same as `predictions/FCD` but with sample rate of 20Hz.
 ### `predictions/VAD`
 
 Same as `predictions/FCD`.
+
+## Running the tests
+
+After installation run `pytest`.
 
 ## Bibliography
 
