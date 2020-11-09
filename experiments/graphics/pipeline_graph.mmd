@@ -1,17 +1,14 @@
 graph LR
   DUEL{DUEL} --> eUtt[extract_utterances.py]
   eUtt --> fUtt{features/utterances}
-  fUtt --> analysis[analysis.ipynb]
 
   DUEL --> eFCD[extract_fcd_features.py]
   eFCD --> fFCD{features/FCD}
   fFCD --> pFCD[predict_fcd.py]
   pFCD --> predictions/FCD{predictions/FCD}
-  predictions/FCD --> analysis
 
   DUEL --> pVAD[predict_vad.py]
   pVAD --> predictions/VAD{predictions/VAD}
-  predictions/VAD --> analysis
   
   DUEL --> eLSTM[extract_lstm_features.py]
   eLSTM --> fLSTM{features/LSTM}
@@ -20,7 +17,6 @@ graph LR
   mLSTM --> pLSTM[predict_lstm.py]
   fLSTM --> pLSTM
   pLSTM --> predictions/LSTM{predictions/LSTM}
-  predictions/LSTM --> analysis
 
   classDef dark fill:#999,stroke:#333;
   class DUEL,eUtt,eFCD,eLSTM,pVAD dark;
