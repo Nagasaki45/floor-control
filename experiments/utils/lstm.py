@@ -14,12 +14,15 @@ PREDICTION_LENGTH = FRAME_RATE * _FUTURE_DURATION
 BATCH_SIZE = 512
 
 
-def prepare_model():
+def prepare_model(full=True):
     '''
     Return the replication of Skantze 2017 LSTM turn-taking model,
     implemented in Keras.
     '''
     model = Sequential()
+
+    # Voice activation (if full), relative pitch, absolute pitch, voiced, power, and spectral flux
+    n_features = 6 if full else 5
 
     model.add(
         LSTM(
@@ -28,7 +31,7 @@ def prepare_model():
             kernel_regularizer=regularizers.l2(0.001),
             input_shape=(
                 SEQUENCE_LENGTH,
-                2 * 6,  # Voice activation, relative pitch, absolute pitch, voiced, power, and spectral flux per interactant
+                2 * n_features,  # Per interactant
             ),
         )
     )

@@ -49,7 +49,7 @@ Here you can find **two** `.npy` file for each session part. The files starting 
 
 ### `models/LSTM`
 
-Here you can find two models, `model_0.h5` and `model_1.h5`. Model `model_k.h5` is trained with the `X` files above to predict column `k` from the `y` files above.
+Here you can find 4 models. Model `model_{interactant}_{full_or_partial}.h5` is trained with the `X` files above to predict column `interactant` from the `y` files above. If the model is `full` it uses all feature in `X`. If partial it omits the voice activity feature (the first two columns from `X`).
 
 ### `predictions/FCD`
 
@@ -57,7 +57,7 @@ Here you can find a `.npy` file for each session part with one column of 0, 1, o
 
 ### `predictions/LSTM`
 
-Same as `predictions/FCD` but with sample rate of 20Hz.
+Same as `predictions/FCD` but with sample rate of 20Hz. Files starting with `full` are for the full model and files starting with `partial` are for the partial model (no voice activity feature).
 
 ### `predictions/VAD`
 

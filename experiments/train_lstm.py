@@ -1,3 +1,4 @@
+import itertools
 import pathlib
 
 import numpy as np
@@ -17,20 +18,24 @@ def main():
 
     filenames = zip(sorted(IN_DIR.glob('X*')), sorted(IN_DIR.glob('y*')))
 
-    for i, (x_filepath, y_filepath) in enumerate(filenames):
-        if (i % 4 == 0):  # Train set only
-            continue
-        Xs.append(np.load(x_filepath))
-        ys.append(np.load(y_filepath))
+    for part in utils.path.session_parts_gen(train_set=True, test_set=False):
+        Xs.append(np.load(IN_DIR / f'X-{part}.npy'))
+        ys.append(np.load(IN_DIR / f'y-{part}.npy'))
 
     X = np.vstack(Xs)
     y = np.vstack(ys)
 
-    for interactant in [0, 1]:
-        model = utils.lstm.prepare_model()
-        batch_generator = utils.lstm.BatchGenerator(X, y[:, interactant])
+    for interactant, full in itertools.product([0, 1], [False, True]):
+        suffix = 'full' if full else 'partial'
+        out_filepath = OUT_DIR / f'model_{interactant}_{suffix}.h5'
+        print(f'Generating {out_filepath}')
+        model = utils.lstm.prepare_model(full=full)
+        batch_generator = utils.lstm.BatchGenerator(
+            X if full else X[:, 2:],  # Droping the 1st feature: voice activity
+            y[:, interactant]
+        )
         model.fit(batch_generator, epochs=EPOCHS)
-        model.save(OUT_DIR / f'model_{interactant}.h5')
+        model.save(out_filepath)
 
 
 if __name__ == '__main__':
