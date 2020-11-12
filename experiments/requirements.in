@@ -4,8 +4,10 @@ keras
 matplotlib
 notebook
 pandas
+pyjags
 pytest
 scipy
+seaborn
 tensorflow
 tgt
 webrtcvad
