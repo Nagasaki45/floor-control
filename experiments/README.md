@@ -8,7 +8,8 @@ We replicated that model with [keras](https://keras.io/).
 
 ## Installation
 
-1. Make sure you have python install. The authors use version 3.8.6, but anything above 3.6 should work.
+1. Make sure you have python installed. The authors use version 3.8.6, but anything above 3.6 should work.
+1. Make sure you have JAGS installed. The authors use version 4.3.0.
 1. Enter the experiments folder with `cd experiments`.
 1. Install dependencies with ``pip install -r requirements.txt``. Using a virtual environment and/or [pip-tools](https://github.com/jazzband/pip-tools) is highly recommended.
 
