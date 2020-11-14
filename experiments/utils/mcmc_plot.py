@@ -49,36 +49,31 @@ def dist(trace, ax, histplot_kwargs=None):
     hdi(hdi_range, ax=ax)
 
 
-def param_comparison(trace, param, comparison, scatter_sample=30, names=None):
+def param_comparison(trace, param, comparison, names, diag_xlim, comp_xlim):
     '''
     Plot parameter comparison.
     '''
     n = len(comparison)
     fig, axes = plt.subplots(nrows=n, ncols=n, figsize=(8, 8))
 
-    if names is None:
-        names = {x: x for x in comparison}
-    else:
-        names = {x: y for x, y in zip(comparison, names)}
+    names = {x: y for x, y in zip(comparison, names)}
 
     x = trace[param]
     x = x.reshape((x.shape[0], -1))
 
-    sample = np.random.randint(len(x[-1]), size=scatter_sample)
-
     for i, first in enumerate(comparison):
-        dist(x[first], ax=axes[i, i])
+        dist(x[first], ax=axes[i, i], histplot_kwargs={'binrange': diag_xlim})
         first_name = names[first]
-        axes[i, i].set(title=f'{param}[{first_name}]')
+        axes[i, i].set(title=f'{param}[{first_name}]', xlim=diag_xlim)
         for j, second in enumerate(comparison[i + 1:], start=i + 1):
-            dist(x[first] - x[second], ax=axes[i, j])
+            dist(x[first] - x[second], ax=axes[i, j], histplot_kwargs={'binrange': comp_xlim})
             axes[i, j].axvline(0, linestyle='--', c='grey')
             seconds_name = names[second]
-            axes[i, j].set(title=f'{param}[{first_name}] - {param}[{seconds_name}]')
-            axes[j, i].scatter(x[first][sample], x[second][sample], s=3)
+            axes[i, j].set(title=f'{param}[{first_name}] - {param}[{seconds_name}]', xlim=comp_xlim)
+            sns.histplot(x=x[first], y=x[second], ax=axes[j, i])
             axes[j, i].set_adjustable('datalim')
             axes[j, i].set_aspect('equal')
-            x_mean = x[first][sample].mean()
+            x_mean = x[first].mean()
             axes[j, i].axline((x_mean, x_mean), slope=1, linestyle='--', color='grey')
             axes[j, i].set(xlabel=f'{param}[{first_name}]', ylabel=f'{param}[{seconds_name}]')
 
