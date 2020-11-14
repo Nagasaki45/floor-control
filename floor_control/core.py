@@ -13,7 +13,7 @@ class StableArgmax:
         argsort = np.argsort(samples)
         max_ = samples[argsort[-1]]
         next_ = samples[argsort[-2]]
-        if max_ - next_ > self._hysteresis:
+        if next_ and max_ / next_ > (1 + self._hysteresis):
             self._previous = argsort[-1]
         return self._previous
 

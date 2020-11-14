@@ -1,6 +1,8 @@
+import audioop
 import pathlib
 import subprocess
 import tempfile
+import wave
 
 import numpy as np
 import webrtcvad
@@ -23,25 +25,6 @@ def upsample(source, target):
     ])
 
 
-class VadDetector:
-    def __init__(
-        self,
-        sample_rate,
-        vad_mode,
-        **_,
-    ):
-        self._vad = webrtcvad.Vad(vad_mode)
-        self._sample_rate = sample_rate
-        self._current_floor_holder = None
-
-    def process(self, buffer):
-        vad_vals = [self._vad.is_speech(x, self._sample_rate) for x in buffer]
-        # Change floor holder when only one is vocalising
-        if sum(vad_vals) == 1:
-            self._current_floor_holder = vad_vals.index(True)
-        return self._current_floor_holder
-
-
 def main():
     utils.path.empty_dir(OUT_DIR)
 
@@ -58,16 +41,41 @@ def main():
                 out_filepath = OUT_DIR / f'{session["name"]}-{part["name"]}.npy'
                 print(f'Generating {out_filepath}')
 
-                gen = utils.audio.wav_per_buffer_feature_extractor_gen(
-                    tf.name,
-                    part['start_time'],
-                    part['end_time'],
-                    BUFFER_DURATION,
-                    session['swapped_stereo'],
-                    extractor_class=VadDetector,
-                    extractor_params={'vad_mode': 3},
-                )
-                np.save(out_filepath, np.array(list(gen)).astype(float))
+                with wave.open(tf.name) as f:
+                    sample_rate = f.getframerate()
+                    sample_width = f.getsampwidth()
+                    buffer_size = int(sample_rate * BUFFER_DURATION)
+                    channels = f.getnchannels()
+
+                    vad = webrtcvad.Vad(3)  # aggressive vad mode
+
+                    pos = 0  # Counting samples, not bytes
+                    start_pos = int(sample_rate * part['start_time'])
+                    end_pos = int(sample_rate * part['end_time'])
+
+                    # Seek to start_time
+                    f.readframes(start_pos)
+                    pos += start_pos
+
+                    results = []
+                    while pos < end_pos:
+                        buffer = f.readframes(buffer_size)
+                        if len(buffer) != buffer_size * sample_width * channels:
+                            break
+                        l = audioop.tomono(buffer, sample_width, 1, 0)
+                        r = audioop.tomono(buffer, sample_width, 0, 1)
+                        if session['swapped_stereo']:
+                            l, r = r, l
+                        vad_vals = [vad.is_speech(x, sample_rate) for x in [l, r]]
+                        # Change floor holder when only one is vocalising
+                        if sum(vad_vals) == 1:
+                            current_floor_holder = vad_vals.index(True)
+                        else:
+                            current_floor_holder = results[-1]
+                        results.append(current_floor_holder)
+                        pos += buffer_size
+
+                np.save(out_filepath, np.array(results).astype(float))
 
 
 if __name__ == '__main__':

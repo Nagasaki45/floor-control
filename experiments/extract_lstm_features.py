@@ -2,24 +2,13 @@ import pathlib
 
 import numpy as np
 import scipy.stats as sstats
-import scipy.signal as ssignal
 
+import utils.audio
 import utils.duel
 import utils.path
-import utils.yin
 
 OUT_DIR = pathlib.Path('features') / 'LSTM'
 BUFFER_DURATION = 0.05
-
-
-def to_chunks(samples, chunk_size):
-    samples = np.concatenate(
-        (
-            samples,
-            np.zeros(shape=(chunk_size - len(samples) % chunk_size, samples.shape[-1])),
-        )
-    )
-    return samples.reshape(-1, chunk_size, samples.shape[-1])
 
 
 def calculate_voice_activity(textgrid, start_time, end_time, buffer_duration):
@@ -29,40 +18,6 @@ def calculate_voice_activity(textgrid, start_time, end_time, buffer_duration):
         [bool(utts.get_annotations_by_time(t)) for utts in [a_utts, b_utts]]
         for t in np.arange(start_time, end_time, buffer_duration)
     ])
-
-
-def calculate_freq(buffers, sample_rate):
-    return np.apply_along_axis(
-        utils.yin.compute_yin,
-        axis=1,
-        arr=buffers,
-        sample_rate=sample_rate
-    )
-
-
-def rms(values):
-    return np.sqrt(np.mean(np.square(values)))
-
-
-def calculate_power(buffers):
-    return 10 * np.log10(np.apply_along_axis(rms, axis=1, arr=buffers))
-
-
-def calculate_spectral_flux(buffers):
-    n_buffers, buffer_size, channels = buffers.shape
-    flatten = buffers.reshape(n_buffers * buffer_size, -1)
-    _, _, stft = ssignal.stft(
-        flatten,
-        nperseg=buffer_size,
-        axis=0,
-        window='hamming',
-        noverlap=0,
-    )
-    abs_stft = np.abs(stft)
-    diff = abs_stft[:, :, :-1] - abs_stft[:, :, 1:]
-    rectified = (diff + np.abs(diff)) / 2
-    flux = np.sum(rectified, axis=0) / np.sum(abs_stft[:, :, :-1], axis=0)
-    return flux.T
 
 
 def calculate_X_and_y(
@@ -76,16 +31,16 @@ def calculate_X_and_y(
 
     samples = samples[int(start_time * sample_rate):int(end_time * sample_rate)]
     buffer_size = int(sample_rate * buffer_duration)
-    buffers = to_chunks(samples, buffer_size)
+    buffers = utils.audio.to_chunks(samples, buffer_size)
 
     y = calculate_voice_activity(textgrid, start_time, end_time, buffer_duration)
 
-    freq = calculate_freq(buffers, sample_rate)
+    freq = utils.audio.calculate_freq(buffers, sample_rate)
     pitch = 69 + 12 * np.log2(freq / 440)  # MIDI note
     pitch[pitch < 0] = 0
     voiced = (freq != 0)
-    power = np.clip(calculate_power(buffers), -96, 0)  # 96dB is 16bit dynamic range
-    spectral_flux = np.nan_to_num(calculate_spectral_flux(buffers))
+    power = np.clip(utils.audio.calculate_power(buffers), -96, 0)  # 96dB is 16bit dynamic range
+    spectral_flux = np.nan_to_num(utils.audio.calculate_spectral_flux(buffers))
 
     X = np.hstack([
         y,
